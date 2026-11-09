@@ -4,3 +4,10 @@ __pycache__/
 .DS_Store
 .venv/
 cache.json
+highlightly_sample.json
+highlightly_sample.json
+highlightly_detail.json
+highlightly_cache.json
+check_*.py
+inspect_*.py
+test_api.py

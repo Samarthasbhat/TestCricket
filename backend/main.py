@@ -141,3 +141,32 @@ def scorecard_view(match_id: str):
     result = clean_scorecard(data.get("data"))
     result["updated_at"] = data.get("_fetched_at")
     return result
+
+
+from highlightly_client import live_tests  # noqa: E402
+
+
+@app.get("/api/live")
+def live_from_highlightly():
+    try:
+        matches, fetched_at = live_tests()
+    except Exception as error:
+        raise HTTPException(status_code=502, detail=f"Highlightly error: {error}")
+    attach_scorecard_ids(matches)
+    return {"count": len(matches), "updated_at": fetched_at, "matches": matches}
+
+
+def _team_key(names):
+    return frozenset((n or "").strip().lower() for n in names)
+
+
+def attach_scorecard_ids(matches):
+    """Link each Highlightly match to its CricketData.org id by team names.
+    If CricketData is unavailable, the cards simply have no scorecard link."""
+    try:
+        rows, _ = get_all("currentMatches", ttl=900)
+        known = {_team_key(m.get("teams") or []): m.get("id") for m in rows if is_official_test(m)}
+    except Exception:
+        known = {}
+    for m in matches:
+        m["scorecard_id"] = known.get(_team_key([m["home"]["name"], m["away"]["name"]]))
