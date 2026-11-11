@@ -1,11 +1,3 @@
-const API_BASE = "http://127.0.0.1:8000";
-
-function esc(text) {
-  const div = document.createElement("div");
-  div.textContent = text == null ? "" : String(text);
-  return div.innerHTML;
-}
-
 function teamRow(t) {
   const logo = t.logo ? `<img src="${esc(t.logo)}" alt="${esc(t.short)}">` : "";
   const score = t.score ? esc(t.score) : "Yet to bat";
@@ -22,24 +14,22 @@ function matchCard(m) {
     <div class="status">${esc(m.report)}</div>
     <div class="venue">${esc(m.venue)}</div>
     ${m.scorecard_id ? '<div class="more">View full scorecard &rarr;</div>' : ""}`;
-  return m.scorecard_id
-    ? `<a class="card" href="match.html?id=${encodeURIComponent(m.scorecard_id)}">${body}</a>`
-    : `<div class="card">${body}</div>`;
+  if (!m.scorecard_id) return `<div class="card">${body}</div>`;
+  const href = `match.html?id=${encodeURIComponent(m.scorecard_id)}${DEMO ? "&demo=1" : ""}`;
+  return `<a class="card" href="${href}">${body}</a>`;
 }
 
 function showUpdated(seconds) {
   const note = document.getElementById("updated");
   if (!seconds) { note.textContent = ""; return; }
   const time = new Date(seconds * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  note.textContent = `Live data last fetched at ${time} (refreshed at most every 10 minutes). Full scorecards come from a different feed and can lag.`;
+  note.textContent = `Live data last fetched at ${time}. Scores can run a few overs behind the live game, and full scorecards come from a different feed that can lag more.`;
 }
 
 async function loadLive() {
   const box = document.getElementById("live");
   try {
-    const response = await fetch(`${API_BASE}/api/live`);
-    if (!response.ok) throw new Error(`Server replied ${response.status}`);
-    const data = await response.json();
+    const data = await api("/api/live", "live.json");
     showUpdated(data.updated_at);
     box.innerHTML = data.count
       ? data.matches.map(matchCard).join("")
@@ -50,3 +40,6 @@ async function loadLive() {
 }
 
 loadLive();
+
+// Re-check every 2 minutes (the backend cache decides if the API is called).
+setInterval(() => { if (!document.hidden) loadLive(); }, 120000);

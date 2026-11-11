@@ -33,7 +33,7 @@ def _save():
         pass
 
 
-def fetch_day(day, ttl=600):
+def fetch_day(day, ttl=300):
     """All matches for one day. Reuses a saved copy younger than ttl seconds,
     and falls back to an older copy if the API fails."""
     key = f"matches:{day}"

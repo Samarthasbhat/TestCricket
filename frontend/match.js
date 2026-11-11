@@ -1,11 +1,3 @@
-const API_BASE = "http://127.0.0.1:8000";
-
-function esc(text) {
-  const div = document.createElement("div");
-  div.textContent = text == null ? "" : String(text);
-  return div.innerHTML;
-}
-
 function battingTable(rows) {
   const body = rows.map((b) => `
     <tr>
@@ -49,12 +41,12 @@ function render(d) {
 
 async function load() {
   const box = document.getElementById("content");
+  document.querySelector(".back").href = "index.html" + (DEMO ? "?demo=1" : "");
   const id = new URLSearchParams(window.location.search).get("id");
   if (!id) { box.textContent = "No match selected."; return; }
   try {
-    const response = await fetch(`${API_BASE}/api/match/${encodeURIComponent(id)}/scorecard`);
-    if (!response.ok) throw new Error(`Server replied ${response.status}`);
-    box.innerHTML = render(await response.json());
+    const data = await api(`/api/match/${encodeURIComponent(id)}/scorecard`, "scorecard.json");
+    box.innerHTML = render(data);
   } catch (error) {
     box.innerHTML = `<span class="error">Could not load scorecard: ${esc(error.message)}</span>`;
   }
