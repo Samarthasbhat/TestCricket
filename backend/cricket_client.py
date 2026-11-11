@@ -10,28 +10,30 @@ load_dotenv()
 API_KEY = os.getenv("CRICKET_API_KEY")
 BASE_URL = "https://api.cricapi.com/v1"
 CACHE_FILE = Path(__file__).parent / "cache.json"
+PAUSE_AFTER_FAILURE = 1800  # seconds to leave the API alone after an error
 
 
 def _load():
     try:
         return json.loads(CACHE_FILE.read_text())
     except Exception:
-        return {}  # no file yet, or it is unreadable
+        return {}
 
 
 _cache = _load()  # {key: [time_saved, data]}
+_paused_until = {}  # {key: time when we may try again}
 
 
 def _save():
     try:
         CACHE_FILE.write_text(json.dumps(_cache))
     except Exception:
-        pass  # failing to save must never break the app
+        pass
 
 
 def fetch(endpoint, params=None, ttl=300):
-    """Call CricketData.org, reusing a saved response if it is newer than ttl seconds.
-    If the API fails, fall back to the last saved copy (marked _stale)."""
+    """Call CricketData.org with caching. After a failure, wait 30 minutes
+    before trying the same call again; serve old saved data meanwhile."""
     params = params or {}
     cache_key = endpoint + str(sorted(params.items()))
     now = time.time()
@@ -39,6 +41,13 @@ def fetch(endpoint, params=None, ttl=300):
 
     if saved and now - saved[0] < ttl:
         return saved[1]  # fresh enough, no API request used
+
+    if now < _paused_until.get(cache_key, 0):
+        if saved:
+            old = dict(saved[1])
+            old["_stale"] = True
+            return old
+        raise RuntimeError("CricketData is paused after an earlier error; retrying later")
 
     try:
         response = httpx.get(
@@ -51,10 +60,11 @@ def fetch(endpoint, params=None, ttl=300):
         if data.get("status") != "success":
             raise RuntimeError(data.get("reason", "Unknown API error"))
     except Exception:
+        _paused_until[cache_key] = now + PAUSE_AFTER_FAILURE
         if saved:
             old = dict(saved[1])
             old["_stale"] = True
-            return old  # old data is better than an error page
+            return old
         raise
 
     data["_fetched_at"] = now
