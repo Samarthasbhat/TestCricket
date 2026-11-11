@@ -20,7 +20,7 @@
   document.querySelectorAll(".tab-btn").forEach((b) =>
     b.addEventListener("click", () => showTab(b.dataset.tab)));
   const startTab = location.hash.slice(1);
-  if (startTab === "wtc" || startTab === "upcoming") showTab(startTab);
+  if (["wtc", "upcoming", "results"].includes(startTab)) showTab(startTab);
 
   function longDate(iso) {
     return new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC" });

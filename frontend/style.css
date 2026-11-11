@@ -187,3 +187,7 @@ td .how { display: block; color: var(--muted); font-size: 0.72rem; margin-top: 0
 .fix-row .d { display: block; color: var(--gold, #cfae62); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .fix-row .v { color: var(--muted, #8b95a5); font-size: 0.78rem; }
 .fixtures .small { color: var(--muted, #8b95a5); font-size: 0.8rem; line-height: 1.5; margin: 0; }
+
+/* Finished matches */
+.state.done { border-color: var(--line, #262e3a); background: transparent; color: var(--muted, #8b95a5); }
+.state.done::before { background: var(--muted, #8b95a5); animation: none; }
