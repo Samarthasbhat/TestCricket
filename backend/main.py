@@ -184,3 +184,18 @@ def results_from_highlightly():
     if "attach_scorecard_ids" in globals():
         attach_scorecard_ids(matches)  # links to the CricketData scorecard when possible
     return {"count": len(matches), "updated_at": fetched_at, "missed_days": missed, "matches": matches}
+
+
+from series_summary import summarise  # noqa: E402
+
+
+@app.get("/api/series/{series_id}/summary")
+def series_summary(series_id: str):
+    try:
+        data = fetch("series_info", {"id": series_id}, ttl=3600)
+    except Exception as error:
+        raise HTTPException(status_code=502, detail=f"Cricket API error: {error}")
+    result = summarise(data.get("data") or {})
+    result["updated_at"] = data.get("_fetched_at")
+    result["stale"] = bool(data.get("_stale"))
+    return result
