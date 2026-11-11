@@ -12,8 +12,8 @@ API_KEY = os.getenv("HIGHLIGHTLY_API_KEY")
 BASE_URL = "https://cricket.highlightly.net"
 CACHE_FILE = Path(__file__).parent / "highlightly_cache.json"
 
-LIVE_WORDS = ("in play", "live", "innings break", "stumps", "tea", "lunch", "dinner", "drinks")
-ENDED_WORDS = ("finished", "abandoned", "no result")
+LIVE_WORDS = ("inplay", "inningsbreak", "stumps", "tea", "lunch", "dinner", "drinks")
+ENDED_WORDS = ("finished", "abandoned", "noresult")
 
 
 def _load():
@@ -33,7 +33,7 @@ def _save():
         pass
 
 
-def fetch_day(day, ttl=600):
+def fetch_day(day, ttl=300):
     """All matches for one day. Reuses a saved copy younger than ttl seconds,
     and falls back to an older copy if the API fails."""
     key = f"matches:{day}"
@@ -97,7 +97,43 @@ def live_tests():
             continue
         if ((m.get("country") or {}).get("name") or "") != "World":
             continue  # keeps internationals, drops domestic and 'A' team matches
-        desc = ((m.get("state") or {}).get("description") or "").lower()
+        desc = ((m.get("state") or {}).get("description") or "").lower().replace(" ", "")
         if any(w in desc for w in LIVE_WORDS) and not any(w in desc for w in ENDED_WORDS):
             out.append(_tidy(m))
     return out, fetched_at
+
+
+from datetime import timedelta  # noqa: E402
+
+RESULT_DAYS = 5  # today plus the 4 days before
+
+
+def recent_tests():
+    """International Tests that have finished in the last few days.
+    Returns (matches, oldest_fetch_time, days_that_failed)."""
+    found = {}
+    oldest = None
+    missed = 0
+    for back in range(RESULT_DAYS):
+        day = (date.today() - timedelta(days=back)).isoformat()
+        ttl = 300 if back == 0 else 21600 if back == 1 else 86400
+        try:
+            data, fetched_at = fetch_day(day, ttl=ttl)
+        except Exception:
+            missed += 1
+            continue
+        oldest = fetched_at if oldest is None else min(oldest, fetched_at)
+        for m in data.get("data") or []:
+            if (m.get("format") or "").upper() != "TEST":
+                continue
+            if ((m.get("country") or {}).get("name") or "") != "World":
+                continue
+            desc = ((m.get("state") or {}).get("description") or "").lower().replace(" ", "")
+            if desc != "finished" or m.get("id") in found:
+                continue
+            item = _tidy(m)
+            item["start"] = m.get("startDate")
+            item["end"] = m.get("endDate")
+            found[m.get("id")] = item
+    matches = sorted(found.values(), key=lambda x: x.get("end") or "", reverse=True)
+    return matches, oldest, missed

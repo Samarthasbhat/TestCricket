@@ -11,3 +11,5 @@ highlightly_cache.json
 check_*.py
 inspect_*.py
 test_api.py
+highlightly_*.json
+show_*.py

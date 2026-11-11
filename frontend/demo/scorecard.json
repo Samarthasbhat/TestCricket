@@ -1,0 +1,21 @@
+{"id":"demo","name":"Afghanistan vs Zimbabwe, 1st Test (demo snapshot, first innings only)","status":"Demo data - not live","venue":"Sharjah Cricket Stadium, Sharjah","date":"2026-11-05","teams":["Afghanistan","Zimbabwe"],"toss":"Zimbabwe chose to bat","updated_at":1794215085,
+"innings":[{"team":"Zimbabwe","innings_no":1,"total":504,"wickets":10,"overs":134.3,"extras":11,
+"batting":[
+{"name":"Innocent Kaia","runs":34,"balls":51,"fours":5,"sixes":0,"strike_rate":66.67,"how_out":"c Rahmanullah b Qais Ahmad","not_out":false},
+{"name":"Ben Curran","runs":42,"balls":113,"fours":3,"sixes":0,"strike_rate":37.17,"how_out":"b Saleem Safi","not_out":false},
+{"name":"Brendan Taylor","runs":131,"balls":168,"fours":14,"sixes":4,"strike_rate":77.98,"how_out":"c Ziaur Rahman Sharifi b Hashmatullah Shahidi","not_out":false},
+{"name":"Brian Bennett","runs":128,"balls":206,"fours":11,"sixes":0,"strike_rate":62.14,"how_out":"c Zia-ur-Rehman b Qais Ahmad","not_out":false},
+{"name":"Craig Ervine","runs":4,"balls":16,"fours":0,"sixes":0,"strike_rate":25,"how_out":"lbw b Zia-ur-Rehman","not_out":false},
+{"name":"Antum Naqvi","runs":9,"balls":15,"fours":1,"sixes":0,"strike_rate":60,"how_out":"c Ikram Alikhil b Zia-ur-Rehman","not_out":false},
+{"name":"Wessly Madhevere","runs":54,"balls":70,"fours":9,"sixes":0,"strike_rate":77.14,"how_out":"c Ikram Alikhil b Ziaur Rahman Sharifi","not_out":false},
+{"name":"Tafadzwa Tsiga","runs":44,"balls":81,"fours":5,"sixes":1,"strike_rate":54.32,"how_out":"lbw b Qais Ahmad","not_out":false},
+{"name":"Graeme Cremer","runs":34,"balls":51,"fours":4,"sixes":0,"strike_rate":66.67,"how_out":"not out","not_out":true},
+{"name":"Newman Nyamhuri","runs":8,"balls":25,"fours":0,"sixes":0,"strike_rate":32,"how_out":"lbw b Saleem Safi","not_out":false},
+{"name":"Blessing Muzarabani","runs":5,"balls":11,"fours":1,"sixes":0,"strike_rate":45.45,"how_out":"b Saleem Safi","not_out":false}],
+"bowling":[
+{"name":"Mohammad Saleem Safi","overs":27.3,"maidens":6,"runs":82,"wickets":3,"no_balls":0,"wides":0,"economy":3},
+{"name":"Ziaur Rahman Sharifi","overs":20,"maidens":3,"runs":79,"wickets":1,"no_balls":0,"wides":0,"economy":4},
+{"name":"Zia-ur-Rehman Akbar","overs":46,"maidens":7,"runs":170,"wickets":2,"no_balls":0,"wides":0,"economy":3.7},
+{"name":"Qais Ahmad","overs":27,"maidens":2,"runs":120,"wickets":3,"no_balls":0,"wides":0,"economy":4.4},
+{"name":"Shahidullah Kamal","overs":2,"maidens":0,"runs":11,"wickets":0,"no_balls":0,"wides":0,"economy":5.5},
+{"name":"Hashmatullah Shahidi","overs":12,"maidens":2,"runs":31,"wickets":1,"no_balls":0,"wides":0,"economy":2.6}]}]}

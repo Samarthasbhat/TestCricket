@@ -170,3 +170,17 @@ def attach_scorecard_ids(matches):
         known = {}
     for m in matches:
         m["scorecard_id"] = known.get(_team_key([m["home"]["name"], m["away"]["name"]]))
+
+
+from highlightly_client import recent_tests  # noqa: E402
+
+
+@app.get("/api/results")
+def results_from_highlightly():
+    try:
+        matches, fetched_at, missed = recent_tests()
+    except Exception as error:
+        raise HTTPException(status_code=502, detail=f"Highlightly error: {error}")
+    if "attach_scorecard_ids" in globals():
+        attach_scorecard_ids(matches)  # links to the CricketData scorecard when possible
+    return {"count": len(matches), "updated_at": fetched_at, "missed_days": missed, "matches": matches}

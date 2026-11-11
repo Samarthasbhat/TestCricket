@@ -1,0 +1,8 @@
+{"count":6,"updated_at":1794215085,"series":[
+{"id":"7acadb0c-bc4e-4c91-8c47-7bbe53f2227b","name":"Bangladesh tour of South Africa, 2026","startDate":"2026-11-15","endDate":"Dec 13","odi":3,"t20":3,"test":2,"matches":8},
+{"id":"5bb37247-d995-429a-b269-3a5f8517c4f2","name":"New Zealand tour of Australia, 2026-27","startDate":"2026-12-09","endDate":"Jan 08","odi":0,"t20":0,"test":4,"matches":4},
+{"id":"93247670-a816-4dde-a282-be0e867e3d26","name":"England tour of South Africa, 2026-27","startDate":"2026-12-17","endDate":"Jan 07","odi":3,"t20":0,"test":3,"matches":6},
+{"id":"181dfb42-895f-4a4d-8907-94c125df9871","name":"Australia tour of India, 2027","startDate":"2027-01-21","endDate":"Mar 03","odi":0,"t20":0,"test":5,"matches":5},
+{"id":"dd321613-5b40-4033-b33c-c4dee1656478","name":"The Ashes 2027","startDate":"2027-06-07","endDate":"Aug 02","odi":0,"t20":0,"test":5,"matches":6},
+{"id":"41c8c253-7e87-4a63-b48c-a96381101c24","name":"ICC World Test Championship Final 2027","startDate":"2027-06-09","endDate":"Jun 13","odi":0,"t20":0,"test":1,"matches":1}
+]}
