@@ -153,6 +153,7 @@ def live_from_highlightly():
     except Exception as error:
         raise HTTPException(status_code=502, detail=f"Highlightly error: {error}")
     attach_scorecard_ids(matches)
+    attach_series(matches)
     return {"count": len(matches), "updated_at": fetched_at, "matches": matches}
 
 
@@ -183,4 +184,48 @@ def results_from_highlightly():
         raise HTTPException(status_code=502, detail=f"Highlightly error: {error}")
     if "attach_scorecard_ids" in globals():
         attach_scorecard_ids(matches)  # links to the CricketData scorecard when possible
+        attach_series(matches)
     return {"count": len(matches), "updated_at": fetched_at, "missed_days": missed, "matches": matches}
+
+
+from series_summary import summarise  # noqa: E402
+
+
+@app.get("/api/series/{series_id}/summary")
+def series_summary(series_id: str):
+    try:
+        data = fetch("series_info", {"id": series_id}, ttl=3600)
+    except Exception as error:
+        raise HTTPException(status_code=502, detail=f"Cricket API error: {error}")
+    result = summarise(data.get("data") or {})
+    result["updated_at"] = data.get("_fetched_at")
+    result["stale"] = bool(data.get("_stale"))
+    return result
+
+
+
+def attach_series(matches):
+    """Add a series headline such as 'West Indies lead 1-0' to each match.
+    Uses the same cached CricketData replies: at most one request per series per hour."""
+    try:
+        rows, _ = get_all("currentMatches", ttl=900)
+        series_of = {_team_key(m.get("teams") or []): m.get("series_id") for m in rows if is_official_test(m)}
+    except Exception:
+        series_of = {}
+    summaries = {}
+    for m in matches:
+        m["series_headline"] = None
+        m["series_may_lag"] = False
+        sid = series_of.get(_team_key([m["home"]["name"], m["away"]["name"]]))
+        if not sid:
+            continue
+        if sid not in summaries:
+            try:
+                data = fetch("series_info", {"id": sid}, ttl=3600)
+                summaries[sid] = summarise(data.get("data") or {})
+            except Exception:
+                summaries[sid] = None
+        info = summaries[sid]
+        if info and info.get("tests"):
+            m["series_headline"] = info["headline"]
+            m["series_may_lag"] = bool(info.get("note"))
