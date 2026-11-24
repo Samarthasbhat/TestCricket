@@ -1,17 +1,18 @@
 # Test Cricket Live Tracker
 
-A free, responsive web app for following Test cricket: live Test matches, full scorecards with batting and bowling figures, and upcoming series. Built from scratch as a learning project.
+A free web app for following international Test cricket: live scores, recent results, upcoming series, full scorecards and the World Test Championship race. Built from scratch as a learning project.
 
-> **Status:** work in progress. The live Tests page and scorecards work locally. Upcoming series and recent results are available in the API but not yet on the home page. Deployment to Netlify and Render is planned.
+> **Status:** works locally. Deployment to Netlify and Render is planned but not done yet.
 
 ## Features
 
-- Live Test matches with a team-labelled score for each innings
-- Full scorecards: batting (runs, balls, 4s, 6s, strike rate, dismissal) and bowling (overs, maidens, runs, wickets, economy)
-- Upcoming Test series, sorted by start date
-- Recent Test results
-- Responsive layout that works on phones and laptops
-- "Last fetched" time shown on the page, because the free data feed can lag
+- **Live Tests:** international Tests in play, with a score per innings, session status and series result
+- **Results:** finished Tests from the last 5 days
+- **Upcoming:** upcoming Test series, with fixtures per series
+- **WTC Race:** World Test Championship table with PCT, points rules and the final date
+- **Scorecards:** batting and bowling figures for each innings
+- **Demo mode:** add `?demo=1` to the address to use saved sample data and spend no API requests
+- Responsive, dark layout
 
 ## Tech stack
 
@@ -19,30 +20,40 @@ A free, responsive web app for following Test cricket: live Test matches, full s
 |---|---|
 | Frontend | HTML, CSS, JavaScript (no frameworks) |
 | Backend | Python, FastAPI, Uvicorn |
-| Data | [CricketData.org](https://cricketdata.org) API (free plan) |
+| Live scores, results | [Highlightly](https://highlightly.net) cricket API (free plan) |
+| Scorecards, series | [CricketData.org](https://cricketdata.org) API (free plan) |
 | Planned hosting | Netlify (frontend), Render (backend) |
+
+Two APIs are used on purpose: Highlightly was fresher for live scores in testing, while only CricketData.org returned full batting and bowling figures on the free plan.
 
 ## Project structure
 
 ```
 TestCricket/
 ├── backend/
-│   ├── main.py            # FastAPI app and API routes
-│   ├── cricket_client.py  # API calls with a file-based cache
-│   ├── scorecard.py       # Cleans the raw scorecard data
-│   ├── requirements.txt   # Python packages
-│   └── .env.example       # Template for your API key
+│   ├── main.py                # FastAPI app and routes
+│   ├── cricket_client.py      # CricketData.org calls, file cache, pause after failure
+│   ├── highlightly_client.py  # Highlightly calls, file cache, live and results filters
+│   ├── scorecard.py           # Cleans the raw scorecard data
+│   ├── series_summary.py      # Works out a series result from match statuses
+│   ├── requirements.txt
+│   └── .env.example           # Template for your API keys
 └── frontend/
-    ├── index.html         # Live matches page
-    ├── match.html         # Scorecard page
-    ├── app.js
-    ├── match.js
-    └── style.css
+    ├── index.html, match.html
+    ├── api.js                 # Backend address and demo-mode switch
+    ├── app.js                 # Live tab
+    ├── results.js             # Results tab
+    ├── upcoming.js            # Upcoming tab
+    ├── wtc.js                 # Tab switching and WTC table
+    ├── match.js               # Scorecard page
+    ├── style.css
+    ├── data/wtc.json          # WTC standings (edited by hand)
+    └── demo/                  # Saved sample data for demo mode
 ```
 
 ## Run it locally
 
-You need Python 3.10 or newer and a free API key from [cricketdata.org](https://cricketdata.org).
+You need Python 3.10 or newer and free API keys from [Highlightly](https://highlightly.net) and [CricketData.org](https://cricketdata.org).
 
 ### 1. Backend
 
@@ -54,13 +65,13 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Open `.env` and replace the placeholder with your real key. Never commit this file.
+Open `.env` and replace both placeholders with your real keys. Never commit this file.
 
 ```bash
 uvicorn main:app --reload
 ```
 
-The API runs at http://127.0.0.1:8000. Interactive docs are at http://127.0.0.1:8000/docs.
+The API runs at http://127.0.0.1:8000, with interactive docs at http://127.0.0.1:8000/docs.
 
 ### 2. Frontend
 
@@ -71,34 +82,38 @@ cd frontend
 python3 -m http.server 5500
 ```
 
-Open http://127.0.0.1:5500.
+Open http://127.0.0.1:5500, or http://127.0.0.1:5500/?demo=1 for demo mode.
 
 ## API endpoints
 
 | Endpoint | Returns |
 |---|---|
-| `GET /api/matches/live` | Test matches in progress |
-| `GET /api/matches/upcoming` | Test matches that have not started (from the current-matches feed) |
-| `GET /api/matches/recent` | Recently finished Tests |
+| `GET /api/live` | International Tests in play (Highlightly) |
+| `GET /api/results` | Finished Tests from the last 5 days (Highlightly) |
 | `GET /api/series/upcoming` | Upcoming series that include Tests |
-| `GET /api/series/{series_id}` | Fixtures and results for one series |
-| `GET /api/match/{match_id}/scorecard` | Cleaned scorecard for one match |
-| `GET /api/match/{match_id}/scorecard/raw` | Unprocessed scorecard from the API (for debugging) |
+| `GET /api/series/{id}` | Fixtures and results for one series |
+| `GET /api/series/{id}/summary` | Series result, such as "West Indies lead 1-0" |
+| `GET /api/match/{id}/scorecard` | Cleaned scorecard for one match |
+| `GET /api/match/{id}/scorecard/raw` | Unprocessed scorecard (for debugging) |
+| `GET /api/matches/live`, `/upcoming`, `/recent` | Older CricketData.org match lists |
 
 ## Good to know
 
-- **The free plan allows 100 API requests per day.** The backend caches responses (15 minutes for match lists, 1 hour for series, 5 minutes for scorecards) and saves the cache to `backend/cache.json`, so restarting the server does not use requests. If the API fails or the limit is reached, the last saved data is served instead.
-- **Scores can lag the live game.** The free feed updates slowly, sometimes by many overs, and the status text can be out of date. The page shows when the data was last fetched.
-- **Some data is messy.** Innings labels and team names are cleaned in `scorecard.py`. Unofficial and warm-up matches are filtered out by name.
+- **Both free plans allow about 100 requests a day.** The backend caches replies in files (`cache.json`, `highlightly_cache.json`, both git-ignored): live data for 5 minutes, yesterday's results for 6 hours and older days for 24 hours; CricketData match lists for 15 minutes, series for 1 hour, scorecards for 5 minutes. After a failed CricketData call it waits 30 minutes before trying that call again, and serves saved data in the meantime.
+- **Scores can lag the live game.** In testing, Highlightly ran about one over behind Cricbuzz, and CricketData.org was sometimes a whole session behind. The page shows when the data was last fetched.
+- **Series results can be wrong when the feed lags.** If a Test is more than 5 days old and still "in progress" in the data, the summary says so instead of presenting a final score.
+- **International Tests are picked by format `TEST` and country `World`.** That worked in testing but is an assumption, not a documented rule.
+- **The WTC table is a manual snapshot** from ESPN and ESPNcricinfo. It may be out of date, so check it against the official ICC table and edit `frontend/data/wtc.json`.
+- **The backend address is hardcoded** as `http://127.0.0.1:8000` in `api.js`, `results.js` and `upcoming.js`. It must change for deployment.
 - **CORS is open (`*`) for development.** Restrict it to your Netlify address before deploying.
 
 ## Roadmap
 
-- [ ] Upcoming series and recent results on the home page
-- [ ] Series pages with results and standings
-- [ ] Restrict CORS and deploy (Render backend, Netlify frontend)
-- [ ] Updated-at note on the scorecard page
+- [ ] Move the backend address into one config file
+- [ ] Deploy the backend (Render) and frontend (Netlify), and restrict CORS
+- [ ] Series result on the Upcoming tab
+- [ ] Test on real phones
 
 ## Data credit
 
-Cricket data is provided by [CricketData.org](https://cricketdata.org) under their terms of use.
+Cricket data is provided by [Highlightly](https://highlightly.net) and [CricketData.org](https://cricketdata.org) under their terms of use.
