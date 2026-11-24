@@ -6,12 +6,19 @@ function teamRow(t) {
     <span class="tscore"><strong>${score}</strong>${info}</span></div>`;
 }
 
+function seriesLine(m) {
+  if (!m.series_headline) return "";
+  const caution = m.series_may_lag ? " (may lag)" : "";
+  return `<div class="series-line">${esc(m.series_headline)}${caution}</div>`;
+}
+
 function matchCard(m) {
   const body = `
     <div class="league">${esc(m.league)}</div>
     <div class="state">${esc(m.state)}</div>
     ${teamRow(m.home)}${teamRow(m.away)}
     <div class="status">${esc(m.report)}</div>
+    ${seriesLine(m)}
     <div class="venue">${esc(m.venue)}</div>
     ${m.scorecard_id ? '<div class="more">View full scorecard &rarr;</div>' : ""}`;
   if (!m.scorecard_id) return `<div class="card">${body}</div>`;

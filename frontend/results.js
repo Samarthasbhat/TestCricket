@@ -29,12 +29,19 @@
       <span class="tscore"><strong>${t.score ? esc(t.score) : "&ndash;"}</strong></span></div>`;
   }
 
-  function resultCard(m) {
+  function seriesLine(m) {
+  if (!m.series_headline) return "";
+  const caution = m.series_may_lag ? " (may lag)" : "";
+  return `<div class="series-line">${esc(m.series_headline)}${caution}</div>`;
+}
+
+function resultCard(m) {
     const body = `
       <div class="league">${esc(m.league)}</div>
       <div class="state done">${esc(m.state)}</div>
       ${teamRow(m.home)}${teamRow(m.away)}
       <div class="status">${esc(m.report)}</div>
+      ${seriesLine(m)}
       <div class="venue">${esc(m.venue)} &middot; ${range(m.start, m.end)}</div>
       ${m.scorecard_id ? '<div class="more">View full scorecard &rarr;</div>' : ""}`;
     if (!m.scorecard_id) return `<div class="card">${body}</div>`;

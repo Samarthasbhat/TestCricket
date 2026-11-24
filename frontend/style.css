@@ -191,3 +191,10 @@ td .how { display: block; color: var(--muted); font-size: 0.72rem; margin-top: 0
 /* Finished matches */
 .state.done { border-color: var(--line, #262e3a); background: transparent; color: var(--muted, #8b95a5); }
 .state.done::before { background: var(--muted, #8b95a5); animation: none; }
+
+.series-line { margin-top: 0.8rem; color: var(--gold-soft, #e3cd94); font-size: 0.82rem; line-height: 1.4; }
+
+/* Gold focus ring for keyboard users, no default blue box */
+.tab-btn:focus { outline: none; }
+.tab-btn:focus-visible { outline: 2px solid var(--gold, #cfae62); outline-offset: 2px; border-radius: 6px; }
+.tag { font-size: 0.74rem; }
